@@ -1,5 +1,5 @@
-//go:build !windows && !js
-// +build !windows,!js
+//go:build !windows && !js && !wasip1
+// +build !windows,!js,!wasip1
 
 package internal
 
