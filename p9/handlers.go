@@ -999,6 +999,16 @@ func (t *txattrwalk) handle(cs *connState) message {
 			pathNode: ref.pathNode,
 			parent:   ref.parent,
 		}
+		// Register the new fidRef in the path tree if it has a parent
+		// This fixes the bug where xattr fidRefs weren't properly tracked
+		if ref.parent != nil && !ref.isRoot() {
+			// Get the name of the current ref from its parent
+			name := ref.parent.pathNode.nameFor(ref)
+			// Add the new xattr fidRef to the same path tree location
+			ref.parent.pathNode.addChild(newRef, name)
+			// Acquire parent reference
+			ref.parent.IncRef()
+		}
 		cs.InsertFID(t.newFID, newRef)
 		return nil
 	}); err != nil {
