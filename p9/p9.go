@@ -54,6 +54,12 @@ const (
 
 	// OpenFlagsModeMask is a mask of valid OpenFlags mode bits.
 	OpenFlagsModeMask OpenFlags = 3
+
+	Append OpenFlags = 0x400  // Linux O_APPEND
+	Create OpenFlags = 0x40   // Linux O_CREAT
+	Excl   OpenFlags = 0x80   // Linux O_EXCL
+	Sync   OpenFlags = 0x1000 // Linux O_SYNC
+	Trunc  OpenFlags = 0x200  // Linux O_TRUNC
 )
 
 // Mode returns only the open mode (read-only, read-write, or write-only).
@@ -63,7 +69,25 @@ func (o OpenFlags) Mode() OpenFlags {
 
 // OSFlags converts a p9.OpenFlags to an int compatible with open(2).
 func (o OpenFlags) OSFlags() int {
-	return int(o & OpenFlagsModeMask)
+	flags := int(o & 0x3) // Access mode bits are the same
+
+	if o&Create != 0 {
+		flags |= os.O_CREATE
+	}
+	if o&Append != 0 {
+		flags |= os.O_APPEND
+	}
+	if o&Trunc != 0 {
+		flags |= os.O_TRUNC
+	}
+	if o&Excl != 0 {
+		flags |= os.O_EXCL
+	}
+	if o&Sync != 0 {
+		flags |= os.O_SYNC
+	}
+
+	return flags
 }
 
 // String implements fmt.Stringer.
@@ -77,7 +101,43 @@ func (o OpenFlags) String() string {
 		return "ReadWrite"
 	case OpenFlagsModeMask:
 		return "OpenFlagsModeMask"
+	case Append:
+		return "Append"
+	case Create:
+		return "Create"
+	case Excl:
+		return "Excl"
+	case Sync:
+		return "Sync"
+	case Trunc:
+		return "Trunc"
 	default:
+		var flags []string
+		if o&ReadWrite == ReadWrite {
+			flags = append(flags, "ReadWrite")
+		} else if o&WriteOnly == WriteOnly {
+			flags = append(flags, "WriteOnly")
+		} else if o&ReadOnly == ReadOnly {
+			flags = append(flags, "ReadOnly")
+		}
+		if o&Append == Append {
+			flags = append(flags, "Append")
+		}
+		if o&Create == Create {
+			flags = append(flags, "Create")
+		}
+		if o&Excl == Excl {
+			flags = append(flags, "Excl")
+		}
+		if o&Sync == Sync {
+			flags = append(flags, "Sync")
+		}
+		if o&Trunc == Trunc {
+			flags = append(flags, "Trunc")
+		}
+		if len(flags) > 0 {
+			return strings.Join(flags, "|")
+		}
 		return fmt.Sprintf("unknown (%#x)", uint32(o))
 	}
 }
