@@ -60,7 +60,7 @@ const (
 	headerLength uint32 = 7
 
 	// maximumLength is the largest possible message.
-	maximumLength uint32 = 4 * 1024 * 1024
+	maximumLength uint32 = 1024 * 1024 * 1024
 
 	// initialBufferLength is the initial data buffer we allocate.
 	initialBufferLength uint32 = 64
